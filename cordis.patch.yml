@@ -1,0 +1,33 @@
+# dsh bundle patch: inserts this plugin into a profile's layer stack.
+- insert:
+    - id: loop-guard
+      name: 'dsh-loop-guard'
+      config:
+        # 空数组 = 对所有 provider / model 生效
+        providers: []
+        models: []
+        # 判定用的「末尾指纹」长度：太短会误伤正常重复措辞，太长会漏检长周期循环
+        probeChars: 96
+        # 回看窗口：指纹必须在这个窗口内重复 minOccurrences 次
+        regionChars: 3072
+        # 触发所需重复次数（含指纹自身）
+        minOccurrences: 5
+        # 单次请求累计输出多少字符之后才开始检测，避免开头就误杀
+        minTotalChars: 2048
+        # 每累计多少字符做一次判定
+        checkEveryChars: 128
+        # 绝对上限（字符），0 = 关闭；与重复检测并行的兜底刹车
+        maxTotalChars: 0
+        # 行级塌缩检测：最近 lineWindow 条「有内容的行」里，不同行不超过 maxUniqueLines 就判退化
+        lineWindow: 400
+        maxUniqueLines: 40
+        # 短于此长度的行（空行、单个括号）不计入行统计
+        lineMinChars: 2
+        # 每新增多少行做一次判定
+        lineCheckEvery: 20
+        # 命中后的动作：throw（抛出错误，由 agent-loop 归入 error finish）| end（静默结束流）
+        onDetect: 'throw'
+        # true = 只记日志不掐断（用于校准，建议首次安装时先开）
+        dryRun: false
+        # 非空则把命中记录追加写入该 jsonl 文件
+        logFile: ''
